@@ -8,6 +8,7 @@ class AlarmingState implements StopwatchState {
     private final StopwatchSMStateView sm;
 
     public AlarmingState(final StopwatchSMStateView sm) {
+
         this.sm = sm;
     }
 
@@ -23,14 +24,20 @@ class AlarmingState implements StopwatchState {
 
     @Override
     public void onTick() {
-        throw new UnsupportedOperationException("onTick in AlarmingState");
+
+        // no countdown here
+
     }
 
     @Override
-    public void updateView() { sm.updateUIRuntime(); }
+    public void updateView() {
+        sm.updateUIRuntime();
+    }
 
     @Override
-    public int getId() { return R.string.ALARMING; }
+    public int getId() {
+        return R.string.ALARMING;
+    }
 
     @Override
     public void onSetTime(int time) {

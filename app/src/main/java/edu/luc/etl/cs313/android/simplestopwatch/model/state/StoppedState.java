@@ -7,7 +7,9 @@ class StoppedState implements StopwatchState {
     private final StopwatchSMStateView sm;
 
     public StoppedState(final StopwatchSMStateView sm) {
+
         this.sm = sm;
+
     }
 
     @Override
@@ -28,21 +30,28 @@ class StoppedState implements StopwatchState {
 
     @Override
     public void onTick() {
+        if (!sm.isTimeZero()) { //will only track hold if time > 0
+
         sm.actionIncHold();
         if (sm.isHoldComplete() && !sm.isTimeZero()) {
             sm.actionBeep();
             sm.actionStart();
             sm.toRunningState();
-        } else {
-            sm.toStoppedState();
+            return; //prevent extra transititon
+            }
         }
+        sm.toStoppedState(); //remains stopped
     }
 
     @Override
-    public void updateView() { sm.updateUIRuntime(); }
+    public void updateView() {
+        sm.updateUIRuntime();
+    }
 
     @Override
-    public int getId() { return R.string.STOPPED; }
+    public int getId() {
+        return R.string.STOPPED;
+    }
 
     @Override
     public void onSetTime(int time) {

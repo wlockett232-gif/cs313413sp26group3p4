@@ -7,6 +7,7 @@ class RunningState implements StopwatchState {
     private final StopwatchSMStateView sm;
 
     public RunningState(final StopwatchSMStateView sm) {
+
         this.sm = sm;
     }
 
@@ -33,10 +34,14 @@ class RunningState implements StopwatchState {
     }
 
     @Override
-    public void updateView() { sm.updateUIRuntime(); }
+    public void updateView() {
+        sm.updateUIRuntime();
+    }
 
     @Override
-    public int getId() { return R.string.RUNNING; }
+    public int getId() {
+        return R.string.RUNNING;
+    }
 
     @Override
     public void onSetTime(int time) {
