@@ -9,6 +9,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.content.Context;
 import android.widget.EditText;
+import android.media.MediaPlayer;
 
 import edu.luc.etl.cs313.android.simplestopwatch.R;
 import edu.luc.etl.cs313.android.simplestopwatch.common.StopwatchModelListener;
@@ -18,6 +19,7 @@ import edu.luc.etl.cs313.android.simplestopwatch.model.StopwatchModelFacade;
 public class StopwatchAdapter extends Activity implements StopwatchModelListener {
 
     private StopwatchModelFacade model;
+    private MediaPlayer mediaPlayer;
 
     protected void setModel(final StopwatchModelFacade model) {
         this.model = model;
@@ -84,6 +86,12 @@ public class StopwatchAdapter extends Activity implements StopwatchModelListener
             final EditText tvS = findViewById(R.id.seconds);
             tvS.setEnabled(isStopped);
             tvS.setFocusableInTouchMode(isStopped);
+
+            if (getString(stateId).equals(getString(R.string.alarming))) {
+                playAlarm();
+            } else {
+                stopAlarm();
+            }
         });
     }
     /**
@@ -92,5 +100,19 @@ public class StopwatchAdapter extends Activity implements StopwatchModelListener
     public void onStartStop(final View view) { // time logic
         // routes to the state machine.
         model.onStartStop();
+    }
+    public void playAlarm() {
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer.create(getApplicationContext(), android.provider.Settings.System.DEFAULT_NOTIFICATION_URI);
+            mediaPlayer.setLooping(true);
+        }
+        mediaPlayer.start();
+    }
+
+    public void stopAlarm() {
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+            mediaPlayer.seekTo(0);
+        }
     }
     }
