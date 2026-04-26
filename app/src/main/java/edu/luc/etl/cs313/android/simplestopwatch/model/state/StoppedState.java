@@ -4,36 +4,43 @@ import edu.luc.etl.cs313.android.simplestopwatch.R;
 
 class StoppedState implements StopwatchState {
 
+    private final StopwatchSMStateView sm;
+
     public StoppedState(final StopwatchSMStateView sm) {
         this.sm = sm;
     }
 
-    private final StopwatchSMStateView sm;
-
     @Override
     public void onStartStop() {
-        sm.actionStart();
-        sm.toRunningState();
+        sm.actionResetHold();
+        sm.actionInc();
+        if (sm.isTimeMax()) {
+            sm.actionBeep();
+            sm.actionStart();
+            sm.toRunningState();
+        } else {
+            sm.toStoppedState();
+        }
     }
 
     @Override
-    public void onLapReset() {
-        sm.actionReset();
-        sm.toStoppedState();
-    }
+    public void onLapReset() { }
 
     @Override
     public void onTick() {
-        throw new UnsupportedOperationException("onTick");
+        sm.actionIncHold();
+        if (sm.isHoldComplete() && !sm.isTimeZero()) {
+            sm.actionBeep();
+            sm.actionStart();
+            sm.toRunningState();
+        } else {
+            sm.toStoppedState();
+        }
     }
 
     @Override
-    public void updateView() {
-        sm.updateUIRuntime();
-    }
+    public void updateView() { sm.updateUIRuntime(); }
 
     @Override
-    public int getId() {
-        return R.string.STOPPED;
-    }
+    public int getId() { return R.string.STOPPED; }
 }

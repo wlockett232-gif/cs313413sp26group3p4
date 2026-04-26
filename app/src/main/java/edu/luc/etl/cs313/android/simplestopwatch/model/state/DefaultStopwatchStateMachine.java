@@ -11,60 +11,57 @@ import edu.luc.etl.cs313.android.simplestopwatch.model.time.TimeModel;
  */
 public class DefaultStopwatchStateMachine implements StopwatchStateMachine {
 
+    private final TimeModel timeModel;
+    private final ClockModel clockModel;
+    private StopwatchState state;
+    private StopwatchModelListener listener;
+
     public DefaultStopwatchStateMachine(final TimeModel timeModel, final ClockModel clockModel) {
         this.timeModel = timeModel;
         this.clockModel = clockModel;
     }
-
-    private final TimeModel timeModel;
-
-    private final ClockModel clockModel;
-
-    /**
-     * The internal state of this adapter component. Required for the State pattern.
-     */
-    private StopwatchState state;
 
     protected void setState(final StopwatchState state) {
         this.state = state;
         listener.onStateUpdate(state.getId());
     }
 
-    private StopwatchModelListener listener;
-
     @Override
     public void setModelListener(final StopwatchModelListener listener) {
         this.listener = listener;
     }
 
-    // forward event uiUpdateListener methods to the current state
-    // these must be synchronized because events can come from the
-    // UI thread or the timer thread
     @Override public synchronized void onStartStop() { state.onStartStop(); }
     @Override public synchronized void onLapReset()  { state.onLapReset(); }
     @Override public synchronized void onTick()      { state.onTick(); }
 
-    @Override public void updateUIRuntime() { listener.onTimeUpdate(timeModel.getRuntime()); }
-    @Override public void updateUILaptime() { listener.onTimeUpdate(timeModel.getLaptime()); }
-
     // known states
-    private final StopwatchState STOPPED     = new StoppedState(this);
-    private final StopwatchState RUNNING     = new RunningState(this);
-    private final StopwatchState LAP_RUNNING = new LapRunningState(this);
-    private final StopwatchState LAP_STOPPED = new LapStoppedState(this);
+    private final StopwatchState STOPPED  = new StoppedState(this);
+    private final StopwatchState RUNNING  = new RunningState(this);
+    private final StopwatchState ALARMING = new AlarmingState(this);
 
     // transitions
-    @Override public void toRunningState()    { setState(RUNNING); }
-    @Override public void toStoppedState()    { setState(STOPPED); }
-    @Override public void toLapRunningState() { setState(LAP_RUNNING); }
-    @Override public void toLapStoppedState() { setState(LAP_STOPPED); }
+    @Override public void toStoppedState()  { setState(STOPPED); }
+    @Override public void toRunningState()  { setState(RUNNING); }
+    @Override public void toAlarmingState() { setState(ALARMING); }
 
-    // actions
-    @Override public void actionInit()       { toStoppedState(); actionReset(); }
-    @Override public void actionReset()      { timeModel.resetRuntime(); actionUpdateView(); }
-    @Override public void actionStart()      { clockModel.start(); }
-    @Override public void actionStop()       { clockModel.stop(); }
-    @Override public void actionLap()        { timeModel.setLaptime(); }
-    @Override public void actionInc()        { timeModel.incRuntime(); actionUpdateView(); }
-    @Override public void actionUpdateView() { state.updateView(); }
+    // actions — leave stubs for teammates to implement
+    @Override public void actionInit()        { toStoppedState(); actionReset(); }
+    @Override public void actionReset()       { timeModel.resetRuntime(); actionUpdateView(); }
+    @Override public void actionStart()       { clockModel.start(); }
+    @Override public void actionStop()        { clockModel.stop(); }
+    @Override public void actionUpdateView()  { state.updateView(); }
+    @Override public void updateUIRuntime()   { listener.onTimeUpdate(timeModel.getRuntime()); }
+
+    // stubs for teammates
+    @Override public void actionInc()         { /* teammate: time model */ }
+    @Override public void actionDec()         { /* teammate: time model */ }
+    @Override public void actionIncHold()     { /* teammate: clock logic */ }
+    @Override public void actionResetHold()   { /* teammate: clock logic */ }
+    @Override public void actionBeep()        { /* teammate: MediaPlayer */ }
+    @Override public void actionAlarm()       { /* teammate: MediaPlayer */ }
+    @Override public void actionStopAlarm()   { /* teammate: MediaPlayer */ }
+    @Override public boolean isTimeZero()     { return false; /* teammate: time model */ }
+    @Override public boolean isTimeMax()      { return false; /* teammate: time model */ }
+    @Override public boolean isHoldComplete() { return false; /* teammate: clock logic */ }
 }
