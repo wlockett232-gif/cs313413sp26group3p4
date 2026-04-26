@@ -37,4 +37,9 @@ class RunningState implements StopwatchState {
 
     @Override
     public int getId() { return R.string.RUNNING; }
+
+    @Override
+    public void onSetTime(int time) {
+
+    }
 }

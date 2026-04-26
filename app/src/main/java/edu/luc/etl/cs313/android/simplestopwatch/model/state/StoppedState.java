@@ -43,4 +43,9 @@ class StoppedState implements StopwatchState {
 
     @Override
     public int getId() { return R.string.STOPPED; }
+
+    @Override
+    public void onSetTime(int time) {
+
+    }
 }

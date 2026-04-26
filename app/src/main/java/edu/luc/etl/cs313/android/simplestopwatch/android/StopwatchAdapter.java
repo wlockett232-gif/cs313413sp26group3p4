@@ -1,31 +1,22 @@
 package edu.luc.etl.cs313.android.simplestopwatch.android;
 
+import android.view.View;
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.View;
 import android.widget.TextView;
-
 import java.util.Locale;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
+import android.widget.EditText;
 
 import edu.luc.etl.cs313.android.simplestopwatch.R;
-import edu.luc.etl.cs313.android.simplestopwatch.common.Constants;
 import edu.luc.etl.cs313.android.simplestopwatch.common.StopwatchModelListener;
 import edu.luc.etl.cs313.android.simplestopwatch.model.ConcreteStopwatchModelFacade;
 import edu.luc.etl.cs313.android.simplestopwatch.model.StopwatchModelFacade;
 
-/**
- * A thin adapter component for the stopwatch.
- *
- * @author laufer
- */
 public class StopwatchAdapter extends Activity implements StopwatchModelListener {
 
-    private static String TAG = "stopwatch-android-activity";
-
-    /**
-     * The state-based dynamic model.
-     */
     private StopwatchModelFacade model;
 
     protected void setModel(final StopwatchModelFacade model) {
@@ -35,18 +26,32 @@ public class StopwatchAdapter extends Activity implements StopwatchModelListener
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // inject dependency on view so this adapter receives UI events
         setContentView(R.layout.activity_main);
-        // inject dependency on model into this so model receives UI events
-        this.setModel(new ConcreteStopwatchModelFacade());
-        // inject dependency on this into model to register for UI updates
-        model.setModelListener(this);
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_main, menu);
-        return true;
+        this.setModel(new ConcreteStopwatchModelFacade());
+        model.setModelListener(this);
+        final EditText tvS = findViewById(R.id.seconds);
+        tvS.setOnEditorActionListener((v, actionId, event) -> {
+            // Triggers when the user presses "Enter" or "Done" on the keyboard
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                try {
+                    int typedTime = Integer.parseInt(tvS.getText().toString());
+                    model.onSetTime(typedTime); // Set the time
+                    model.onStartStop();        // Start the timer
+                } catch (NumberFormatException e) {
+                    // Ignore if empty
+                }
+
+                // Hide the on-screen keyboard
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+                // Clear focus from the text box
+                tvS.clearFocus();
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -55,41 +60,37 @@ public class StopwatchAdapter extends Activity implements StopwatchModelListener
         model.start();
     }
 
-    // TODO remaining lifecycle methods
 
-    /**
-     * Updates the seconds and minutes in the UI.
-     * @param time
-     */
+    @Override
     public void onTimeUpdate(final int time) {
-        // UI adapter responsibility to schedule incoming events on UI thread
         runOnUiThread(() -> {
             final TextView tvS = findViewById(R.id.seconds);
-            final TextView tvM = findViewById(R.id.minutes);
             final var locale = Locale.getDefault();
-            tvS.setText(String.format(locale,"%02d", time % Constants.SEC_PER_MIN));
-            tvM.setText(String.format(locale,"%02d", time / Constants.SEC_PER_MIN));
+            tvS.setText(String.format(locale,"%02d", time));
         });
     }
 
-    /**
-     * Updates the state name in the UI.
-     * @param stateId
-     */
+    @Override
     public void onStateUpdate(final int stateId) {
-        // UI adapter responsibility to schedule incoming events on UI thread
         runOnUiThread(() -> {
             final TextView stateName = findViewById(R.id.stateName);
             stateName.setText(getString(stateId));
+
+            // --- ADD THE BOOLEAN LOGIC HERE ---
+            // Check if the current state is "stopped"
+            boolean isStopped = getString(stateId).equals(getString(R.string.stopped));
+
+            // Find the EditText and enable/disable it based on that boolean
+            final EditText tvS = findViewById(R.id.seconds);
+            tvS.setEnabled(isStopped);
+            tvS.setFocusableInTouchMode(isStopped);
         });
     }
-
-    // forward event listener methods to the model
-    public void onStartStop(final View view) {
+    /**
+     * Handlers for the three specific UI buttons
+     */
+    public void onStartStop(final View view) { // time logic
+        // routes to the state machine.
         model.onStartStop();
     }
-
-    public void onLapReset(final View view)  {
-        model.onLapReset();
     }
-}

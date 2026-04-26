@@ -47,6 +47,13 @@ public class DefaultStopwatchStateMachine implements StopwatchStateMachine {
 
     // actions — leave stubs for teammates to implement
     @Override public void actionInit()        { toStoppedState(); actionReset(); }
+
+    @Override
+    public void onSetTime(int time) {
+        // Route the manually typed time down into the current state
+        state.onSetTime(time);
+    }
+
     @Override public void actionReset()       { timeModel.resetRuntime(); actionUpdateView(); }
     @Override public void actionStart()       { clockModel.start(); }
     @Override public void actionStop()        { clockModel.stop(); }
@@ -54,14 +61,28 @@ public class DefaultStopwatchStateMachine implements StopwatchStateMachine {
     @Override public void updateUIRuntime()   { listener.onTimeUpdate(timeModel.getRuntime()); }
 
     // stubs for teammates
-    @Override public void actionInc()         { /* teammate: time model */ }
-    @Override public void actionDec()         { /* teammate: time model */ }
+    @Override
+    public void actionInc() {
+        timeModel.incRuntime();
+        updateUIRuntime();
+    }
+    @Override
+    public void actionDec() {
+        timeModel.decRuntime();
+        updateUIRuntime();
+    }
     @Override public void actionIncHold()     { /* teammate: clock logic */ }
     @Override public void actionResetHold()   { /* teammate: clock logic */ }
     @Override public void actionBeep()        { /* teammate: MediaPlayer */ }
     @Override public void actionAlarm()       { /* teammate: MediaPlayer */ }
     @Override public void actionStopAlarm()   { /* teammate: MediaPlayer */ }
-    @Override public boolean isTimeZero()     { return false; /* teammate: time model */ }
-    @Override public boolean isTimeMax()      { return false; /* teammate: time model */ }
+    @Override
+    public boolean isTimeZero() {
+        return timeModel.getRuntime() == 0;
+    }
+    @Override
+    public boolean isTimeMax() {
+        return timeModel.getRuntime() == 99;
+    }
     @Override public boolean isHoldComplete() { return false; /* teammate: clock logic */ }
 }

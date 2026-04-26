@@ -48,4 +48,9 @@ public class ConcreteStopwatchModelFacade implements StopwatchModelFacade {
         stateMachine.onLapReset();
     }
 
+    @Override
+    public void onSetTime(int time) {
+        stateMachine.onSetTime(time);
+    }
+
 }

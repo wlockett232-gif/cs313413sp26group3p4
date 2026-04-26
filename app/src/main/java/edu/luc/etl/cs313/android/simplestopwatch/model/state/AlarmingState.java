@@ -31,4 +31,9 @@ class AlarmingState implements StopwatchState {
 
     @Override
     public int getId() { return R.string.ALARMING; }
+
+    @Override
+    public void onSetTime(int time) {
+
+    }
 }
