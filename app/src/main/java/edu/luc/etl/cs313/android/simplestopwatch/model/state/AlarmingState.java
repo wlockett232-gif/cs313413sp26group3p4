@@ -24,9 +24,7 @@ class AlarmingState implements StopwatchState {
 
     @Override
     public void onTick() {
-
         // no countdown here
-
     }
 
     @Override
@@ -36,7 +34,7 @@ class AlarmingState implements StopwatchState {
 
     @Override
     public int getId() {
-        return R.string.ALARMING;
+        return R.string.alarming;
     }
 
     @Override

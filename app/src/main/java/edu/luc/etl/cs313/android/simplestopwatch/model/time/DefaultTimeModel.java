@@ -26,7 +26,7 @@ public class DefaultTimeModel implements TimeModel {
     public void incRuntime() {
         // Only increment if we haven't hit the 99 preset maximum
         if (runningTime < 99) {
-            runningTime++;
+            ++runningTime;
         }
     }
 

@@ -9,7 +9,7 @@ import edu.luc.etl.cs313.android.simplestopwatch.model.time.TimeModel;
  *
  * @author laufer
  */
-public class DefaultStopwatchStateMachine implements StopwatchStateMachine {
+public class DefaultStopwatchStateMachine implements StopwatchStateMachine, StopwatchSMStateView {
 
     private final TimeModel timeModel;
     private final ClockModel clockModel;
@@ -35,15 +35,15 @@ public class DefaultStopwatchStateMachine implements StopwatchStateMachine {
     @Override public synchronized void onLapReset()  { state.onLapReset(); }
     @Override public synchronized void onTick()      { state.onTick(); }
 
-    // known states
+    // known state
     private final StopwatchState STOPPED  = new StoppedState(this);
     private final StopwatchState RUNNING  = new RunningState(this);
     private final StopwatchState ALARMING = new AlarmingState(this);
 
     // transitions
-    @Override public void toStoppedState()  { setState(STOPPED); }
-    @Override public void toRunningState()  { setState(RUNNING); }
-    @Override public void toAlarmingState() { setState(ALARMING); }
+    public void toStoppedState()  { setState(STOPPED); }
+    public void toRunningState()  { setState(RUNNING); }
+    public void toAlarmingState() { setState(ALARMING); }
 
     // actions — leave stubs for teammates to implement
     @Override public void actionInit()        { toStoppedState(); actionReset(); }
@@ -54,11 +54,16 @@ public class DefaultStopwatchStateMachine implements StopwatchStateMachine {
         state.onSetTime(time);
     }
 
-    @Override public void actionReset()       { timeModel.resetRuntime(); actionUpdateView(); }
-    @Override public void actionStart()       { clockModel.start(); }
-    @Override public void actionStop()        { clockModel.stop(); }
-    @Override public void actionUpdateView()  { state.updateView(); }
-    @Override public void updateUIRuntime()   { listener.onTimeUpdate(timeModel.getRuntime()); }
+    @Override
+    public void actionReset()       { timeModel.resetRuntime(); actionUpdateView(); }
+    @Override
+    public void actionStart()       { clockModel.start(); }
+    @Override
+    public void actionStop()        { clockModel.stop(); }
+    @Override
+    public void actionUpdateView()  { state.updateView(); }
+    @Override
+    public void updateUIRuntime()   { listener.onTimeUpdate(timeModel.getRuntime()); }
 
     // stubs for teammates
     @Override
@@ -71,11 +76,16 @@ public class DefaultStopwatchStateMachine implements StopwatchStateMachine {
         timeModel.decRuntime();
         updateUIRuntime();
     }
-    @Override public void actionIncHold()     { /* teammate: clock logic */ }
-    @Override public void actionResetHold()   { /* teammate: clock logic */ }
-    @Override public void actionBeep()        { /* teammate: MediaPlayer */ }
-    @Override public void actionAlarm()       { /* teammate: MediaPlayer */ }
-    @Override public void actionStopAlarm()   { /* teammate: MediaPlayer */ }
+    @Override
+    public void actionIncHold()     { /* teammate: clock logic */ }
+    @Override
+    public void actionResetHold()   { /* teammate: clock logic */ }
+    @Override
+    public void actionBeep()        { /* teammate: MediaPlayer */ }
+    @Override
+    public void actionAlarm()       { /* teammate: MediaPlayer */ }
+    @Override
+    public void actionStopAlarm()   { /* teammate: MediaPlayer */ }
     @Override
     public boolean isTimeZero() {
         return timeModel.getRuntime() == 0;
@@ -84,5 +94,6 @@ public class DefaultStopwatchStateMachine implements StopwatchStateMachine {
     public boolean isTimeMax() {
         return timeModel.getRuntime() == 99;
     }
-    @Override public boolean isHoldComplete() { return false; /* teammate: clock logic */ }
+    @Override
+    public boolean isHoldComplete() { return false; /* teammate: clock logic */ }
 }
